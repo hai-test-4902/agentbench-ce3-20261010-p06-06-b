@@ -7,7 +7,8 @@ from pathlib import Path
 from urllib.error import URLError
 
 from .client import Client
-from .output import export_events, show_events
+from .compare import compare_events
+from .output import export_events, show_comparison, show_events
 
 
 def finite(value: str) -> float:
@@ -31,10 +32,14 @@ def parser() -> argparse.ArgumentParser:
     root = argparse.ArgumentParser(prog="quakewatch")
     root.add_argument("--version", action="version", version="quakewatch 0.1.0")
     commands = root.add_subparsers(dest="command", required=True)
-    for name in ("list", "export"):
+    for name in ("list", "export", "compare"):
         cmd = commands.add_parser(name)
         cmd.add_argument("--window", choices=("hour", "day", "week"), default="day")
-        cmd.add_argument("--source", choices=("usgs", "emsc", "both"), default="both")
+        cmd.add_argument(
+            "--source",
+            choices=("both",) if name == "compare" else ("usgs", "emsc", "both"),
+            default="both",
+        )
         cmd.add_argument("--min-mag", type=finite)
         cmd.add_argument("--near", type=coordinates)
         cmd.add_argument("--radius-km", type=finite)
@@ -59,6 +64,8 @@ def main(argv: list[str] | None = None) -> int:
         )
         if args.command == "export":
             export_events(events, args.output, args.format)
+        elif args.command == "compare":
+            show_comparison(compare_events(events))
         else:
             show_events(events)
     except (OSError, ValueError, URLError) as exc:

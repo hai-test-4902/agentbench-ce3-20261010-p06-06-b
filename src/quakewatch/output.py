@@ -9,6 +9,7 @@ from typing import TextIO
 from rich.console import Console
 from rich.table import Table
 
+from .compare import Comparison
 from .models import Event
 
 
@@ -80,3 +81,25 @@ def export_events(events: list[Event], path: Path, format: str) -> None:
                 indent=2,
             )
         out.write("\n")
+
+
+def show_comparison(result: Comparison) -> None:
+    print(f"Matched: {len(result.matches)}")
+    print(f"Unmatched USGS: {len(result.unmatched_usgs)}")
+    print(f"Unmatched EMSC: {len(result.unmatched_emsc)}")
+    table(
+        ["USGS ID", "EMSC ID", "Mag USGS", "Mag EMSC", "Delta (USGS-EMSC)"],
+        [
+            [
+                match.usgs.id,
+                match.emsc.id,
+                "?" if match.usgs.magnitude is None else f"{match.usgs.magnitude:g}",
+                "?" if match.emsc.magnitude is None else f"{match.emsc.magnitude:g}",
+                "?"
+                if match.magnitude_difference is None
+                else f"{match.magnitude_difference:+.2f}",
+            ]
+            for match in result.matches
+        ],
+        sys.stdout,
+    )

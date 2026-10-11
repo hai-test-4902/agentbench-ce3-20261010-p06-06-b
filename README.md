@@ -21,6 +21,8 @@ quakewatch list --window day --source both --min-mag 3
 quakewatch list --window week --source usgs --near 37.77,-122.42 --radius-km 150
 quakewatch list --window hour --cache-ttl 60
 quakewatch list --window day --no-cache
+quakewatch compare --window day
+quakewatch compare --window week --min-mag 4 --no-cache
 quakewatch export --window day --source both --format csv --output earthquakes.csv
 quakewatch export --window week --min-mag 4 --format json -o earthquakes.json
 quakewatch export --window day --format geojson -o earthquakes.geojson
@@ -54,6 +56,20 @@ The immutable `Event` model contains `id`, aware UTC `time`, nullable `magnitude
 `depth_km`, `lat`, `lon`, `place`, and `source`. JSON and CSV share these fields.
 GeoJSON adds Point geometry in longitude/latitude/altitude order; altitude is
 negative depth in metres, while the property `depth_km` remains in kilometres.
+
+## Comparison
+
+`quakewatch compare --window day` fetches both sources and reports matched and
+unmatched counts, followed by both magnitudes and their signed difference
+(USGS minus EMSC) for every pair. Unknown magnitudes display `?`.
+The library exposes `compare_events(events) -> Comparison`.
+
+A candidate pair must be within **60 seconds and 50 km**, inclusive. Matching is
+one-to-one and maximizes the number of pairs; ties are explored deterministically
+by time difference, distance, and ID. Dense aftershock sequences remain ambiguous:
+this heuristic cannot establish authoritative event identity. Filters apply to
+each catalogue before matching, so a magnitude threshold can remove one member
+of a potential pair. `compare` always uses both sources.
 
 ## Data differences and attribution
 
