@@ -7,3 +7,11 @@ node_modules/
 artifacts/
 state/
 *.pid
+.cache/
+.tools/
+.mypy_cache/
+.ruff_cache/
+.pytest_cache/
+.coverage*
+dist/
+*.egg-info/

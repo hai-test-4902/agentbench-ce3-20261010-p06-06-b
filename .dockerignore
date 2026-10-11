@@ -1,0 +1,10 @@
+*
+!pyproject.toml
+!README.md
+!LICENSE
+!src/
+!src/**
+!dist/
+dist/*
+!dist/*.whl
+!requirements-check.txt
